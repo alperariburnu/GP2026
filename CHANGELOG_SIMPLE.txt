@@ -1,0 +1,117 @@
+CHANGELOG - Simple Summary
+Date: 2026-03-15
+
+This document lists each modified or added script, showing a concise "Before" (what the file contained originally) and "After" (what it contains now). Only the relevant lines/behaviors are shown for brevity.
+
+1) Assets/Scripts/Point.cs
+- Before:
+```csharp
+// fields
+private int value = 10;
+
+// methods
+public void Collect()
+private IEnumerator PopAndRelease()
+```
+
+- After:
+```csharp
+// fields (unchanged)
+private int value = 10;
+
+// existing methods preserved
+public void Collect()
+private IEnumerator PopAndRelease()
+
+// added
+public int GetValue() { return value; }
+public void SetValue(int newValue) { /* validation then assign */ }
+public void ModifyValueBy(ref int amount, out int resultingValue) { /* ref/out example */ }
+```
+
+2) Assets/Scripts/PointSpawner.cs
+- Before:
+```csharp
+private Vector2 GetRandomPositionInRect(Rect r) { /* returns random pos */ }
+private void SpawnOne() { var pos = GetRandomPositionInRect(spawnArea); p.transform.position = pos; }
+```
+
+- After:
+```csharp
+private Vector2 GetRandomPositionInRect(Rect r) { /* same */ }
+
+// added ref helper
+private void ClampPositionToRect(ref Vector2 position, Rect bounds) { /* clamps values */ }
+
+private void SpawnOne()
+{
+    Vector2 spawnPos = GetRandomPositionInRect(spawnArea);
+    ClampPositionToRect(ref spawnPos, spawnArea);
+    p.transform.position = spawnPos;
+}
+```
+
+3) Assets/Scripts/ClickController.cs
+- Before:
+```csharp
+// input handling
+private void TryHit(Vector2 worldPosition)
+{
+    RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero);
+    if (hit.collider != null) {
+        var point = hit.collider.GetComponent<Point>();
+        if (point != null) point.Collect();
+    }
+}
+```
+
+- After:
+```csharp
+private int clickCount = 0;
+
+private void TryHit(Vector2 worldPosition)
+{
+    RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero);
+    if (hit.collider != null) {
+        var point = hit.collider.GetComponent<Point>();
+        if (point != null) {
+            clickCount++;
+            point.Collect();
+            FindAndDisplayClickCount(); // demonstrates FindObjectOfType/GameObject.Find/GetScore
+        }
+    }
+}
+
+private void FindAndDisplayClickCount() { /* finds Canvas, logs score, etc. */ }
+```
+
+4) Assets/Scripts/GameManager.cs
+- Before:
+```csharp
+public void AddScore(int amount) { /* existing */ }
+public int GetScore() { return score; }
+```
+
+- After:
+```csharp
+public void AddScore(int amount) { /* existing */ }
+public int GetScore() { return score; }
+public void SetScore(int newScore) { /* new: set/reset score and update UI */ }
+```
+
+5) Assets/Scripts/SceneFinderDemo.cs (new file)
+- After (created):
+```csharp
+// Usage examples in Start():
+// - dragAssigned (Inspector) usage
+// - GameObject.Find(nameToFind) -> TMP text = "Found by Name"
+// - GameObject.FindWithTag(tagToFind) -> Camera.backgroundColor = Color.gray
+// - FindObjectOfType<Canvas>() -> log
+// - byName.GetComponent<SpriteRenderer>().color = Color.green
+// - GameManager.Instance.SetScore(0)
+```
+
+Notes:
+- The changes were applied to the working directory: modified files and one new file were created.
+- If you want the full original and full updated source for any specific file pasted here, tell me which file(s) and I'll append them in full.
+- I did not run a build unless you request it.
